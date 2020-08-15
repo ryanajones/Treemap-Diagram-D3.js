@@ -2,12 +2,11 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
 
-// Pre define necessary variables
-
 const w = 1200;
 const h = 770;
-const padding = 60;
+const legendItems = [];
 
+// Define tooltip
 const tooltip = d3
   .select('body')
   .append('div')
@@ -15,14 +14,6 @@ const tooltip = d3
   .style('opacity', 0);
 
 const svg = d3.select('main').append('svg').attr('width', w).attr('height', h);
-
-const treemap = d3
-  .treemap()
-  .tile(d3.treemapResquarify)
-  .size([w, h])
-  .round(true)
-  .paddingInner(1)
-  .paddingOuter(1);
 
 const color = [
   '#D4D8CC',
@@ -47,19 +38,30 @@ const color = [
 ];
 
 const colorScale = d3.scaleOrdinal(color);
-// Define json call
 
 d3.json(
   'https://cdn.rawgit.com/freeCodeCamp/testable-projects-fcc/a80ce8f9/src/data/tree_map/kickstarter-funding-data.json'
 ).then((data) => {
+  // Define the treemap here
+  const treemap = d3
+    .treemap()
+    .tile(d3.treemapResquarify)
+    .size([w, h])
+    .round(true)
+    .paddingInner(1)
+    .paddingOuter(1);
+
   const root = d3
     .hierarchy(data)
     .eachBefore((d) => {
       d.data.id = (d.parent ? `${d.parent.data.id}.` : '') + d.data.name;
-      /*  legendItems.push(d); */
+      if (d.parent && d.children) {
+        legendItems.push(d);
+      }
     })
     .sum((d) => d.value)
     .sort((a, b) => b.height - a.height || b.value - a.value);
+
   treemap(root);
 
   const cell = svg
@@ -67,9 +69,25 @@ d3.json(
     .data(root.leaves())
     .enter()
     .append('g')
-    .attr('transform', (d) => `translate(${d.x0},${d.y0})`);
+    .attr('transform', (d) => `translate(${d.x0},${d.y0})`)
+    .on('mousemove', (d, i) => {
+      const { name, category, value } = d.data;
+      const [x, y] = [d3.event.pageX, d3.event.pageY];
+      tooltip
+        .style('opacity', 0.9)
+        .style('top', `${y - 28}px`)
+        .style('left', `${x + 10}px`)
+        .attr('data-value', value);
+      tooltip.html(
+        `${category} <br> ${name} <br>$${value
+          .toString()
+          .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`
+      );
+    })
+    .on('mouseout', () => {
+      tooltip.style('opacity', 0);
+    });
 
-  console.log(root);
   cell
     .append('rect')
     .attr('class', 'tile')
@@ -91,5 +109,32 @@ d3.json(
     .style('margin-top', '3px')
     .style('font-family', 'Arial')
     .style('font-size', '12px')
+    .text((d) => d.data.name);
+
+  // Define the legend here
+  const legend = d3
+    .select('body')
+    .append('svg')
+    .attr('width', 100)
+    .attr('height', h)
+    .style('background-color', '#333');
+
+  const legends = legend.selectAll('g').data(legendItems).enter().append('g');
+  console.log(legendItems);
+  legends
+    .append('rect')
+    .attr('width', 40)
+    .attr('height', 25)
+    .attr('x', 0)
+    .attr('y', (d, i) => i * 32.5)
+    .attr('fill', (d, i) => colorScale(d.data.name));
+
+  const legendText = legends
+    .selectAll('text')
+    .data(legendItems)
+    .enter()
+    .append('text')
+    .attr('x', 48)
+    .attr('y', (d, i) => i * 32.5 + 18)
     .text((d) => d.data.name);
 });
