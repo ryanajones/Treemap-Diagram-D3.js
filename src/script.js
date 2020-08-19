@@ -6,7 +6,7 @@ const w = 1200;
 const h = 770;
 const legendItems = [];
 
-// Define tooltip
+// Define the tooltip here
 const tooltip = d3
   .select('body')
   .append('div')
@@ -115,18 +115,20 @@ d3.json(
   const legend = d3
     .select('body')
     .append('svg')
-    .attr('width', 100)
-    .attr('height', h)
+    .attr('id', 'legend')
+    .attr('width', 200)
+    .attr('height', h - 4)
+    .attr('fill', 'rgb(223, 223, 223)')
     .style('background-color', '#333');
 
   const legends = legend.selectAll('g').data(legendItems).enter().append('g');
-  console.log(legendItems);
+
   legends
     .append('rect')
     .attr('width', 40)
-    .attr('height', 25)
+    .attr('height', 30)
     .attr('x', 0)
-    .attr('y', (d, i) => i * 32.5)
+    .attr('y', (d, i) => i * 39.7)
     .attr('fill', (d, i) => colorScale(d.data.name));
 
   const legendText = legends
@@ -135,6 +137,6 @@ d3.json(
     .enter()
     .append('text')
     .attr('x', 48)
-    .attr('y', (d, i) => i * 32.5 + 18)
+    .attr('y', (d, i) => i * 39.7 + 21)
     .text((d) => d.data.name);
 });
