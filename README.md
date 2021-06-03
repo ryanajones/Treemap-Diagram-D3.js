@@ -1,6 +1,6 @@
 # Treemap Diagram D3.js
 
-This is a data visualization treemap diagram of the top one hundred most pledged Kickstarter campaigns grouped by category. Kickstarter is a company that maintains a global crowdfunding platform focused on creativity.
+> A data visualization treemap diagram of the top one hundred most pledged Kickstarter campaigns grouped by category. Kickstarter is a company that maintains a global crowdfunding platform focused on creativity. The D3 JavaScript library is used to convert JSON data into dynamic, interactive data visualizations.
 
 ## Technologies Used
 
